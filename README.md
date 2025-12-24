@@ -1,6 +1,6 @@
 # **🕵️‍♀️ Alice's Word Search Game**
 
-Sebuah permainan **Cari Kata (Word Search)** klasik yang dibangun menggunakan **Python** dan library **Pygame**. Game ini menantang pemain untuk menemukan kata-kata tersembunyi di dalam grid acak berdasarkan petunjuk kuis bertema *"Alice in Wonderland"*.
+Sebuah permainan **Cari Kata (Word Search)** klasik yang dibangun menggunakan **Python** dan library **Pygame**. Game ini menantang pemain untuk menemukan kata-kata tersembunyi di dalam grid acak berdasarkan petunjuk kuis bertema _"Alice in Wonderland"_.
 
 ## **✨ Fitur Utama**
 
@@ -44,16 +44,18 @@ python game.py
 1. **Lihat Petunjuk:** Di sisi kanan layar terdapat daftar pertanyaan kuis (Contoh: "Tokoh utama Alice in...").
 2. **Cari Kata:** Temukan jawaban dari pertanyaan tersebut di dalam grid huruf (Contoh: "WONDERLAND").
 3. **Seleksi:**
-    - Klik kiri dan tahan pada huruf pertama.
 
-    - Geser (drag) mouse ke arah huruf terakhir kata tersebut.
+   - Klik kiri dan tahan pada huruf pertama.
 
-    - Lepas tombol mouse.
+   - Geser (drag) mouse ke arah huruf terakhir kata tersebut.
+
+   - Lepas tombol mouse.
+
 4. Jika benar, huruf akan berubah menjadi **Hijau** dan jawaban di panel kanan akan terbuka.
 
 ## **📂 Struktur File & Aset**
 
-Game ini dirancang untuk memuat aset gambar jika tersedia, namun akan menggunakan warna *fallback* jika gambar tidak ada.
+Game ini dirancang untuk memuat aset gambar jika tersedia, namun akan menggunakan warna _fallback_ jika gambar tidak ada.
 
 - `game.py`: File utama kode program.
 
@@ -77,7 +79,7 @@ DATA_KUIS = {
 }
 ```
 
-*Catatan: Pastikan jawaban hanya berisi huruf kapital dan tanpa spasi agar sesuai dengan logika grid.*
+_Catatan: Pastikan jawaban hanya berisi huruf kapital dan tanpa spasi agar sesuai dengan logika grid._
 
 ## **🧠 Konsep Pemrograman**
 
@@ -93,4 +95,4 @@ Proyek ini menerapkan beberapa konsep dasar Informatika:
 
 ---
 
-Made With ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+# **Made With** ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
