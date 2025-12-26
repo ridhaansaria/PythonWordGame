@@ -2,11 +2,11 @@ import pygame
 import sys
 import os
 
-from settings import *
-from levels import LEVEL_DATA
-from utils import create_grid
-# Import semua fungsi UI dari ui.py
-from pages import draw_menu_page, draw_instructions_page, draw_game_panel, draw_button 
+from helper.settings import *
+from helper.levels import LEVEL_DATA
+from helper.utils import create_grid
+from pages.menu import draw_menu_page, draw_instructions_page
+from pages.game import draw_game_panel
 
 class WordSearchGame:
     def __init__(self):
@@ -30,9 +30,9 @@ class WordSearchGame:
 
         # --- SETUP TOMBOL ---
         cx = SCREEN_WIDTH // 2
-        self.btn_start = pygame.Rect(0, 0, 200, 50); self.btn_start.center = (cx, 300)
-        self.btn_help = pygame.Rect(0, 0, 200, 50); self.btn_help.center = (cx, 370)
-        self.btn_quit = pygame.Rect(0, 0, 200, 50); self.btn_quit.center = (cx, 440)
+        self.btn_start = pygame.Rect(0, 0, 280, 50); self.btn_start.center = (cx, 350)
+        self.btn_help = pygame.Rect(0, 0, 280, 50); self.btn_help.center = (cx, 420)
+        self.btn_quit = pygame.Rect(0, 0, 280, 50); self.btn_quit.center = (cx, 490)
         self.btn_back = pygame.Rect(0, 0, 150, 40); self.btn_back.bottomright = (SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20)
         
         # Rect Hint di-inisialisasi dulu, nanti posisinya diatur ulang oleh ui.py

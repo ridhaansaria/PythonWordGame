@@ -1,5 +1,3 @@
-# settings.py
-
 # --- KONFIGURASI LAYAR ---
 SCREEN_WIDTH = 1050
 SCREEN_HEIGHT = 700
