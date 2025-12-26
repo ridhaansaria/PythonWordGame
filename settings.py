@@ -1,7 +1,7 @@
 # settings.py
 
 # --- KONFIGURASI LAYAR ---
-SCREEN_WIDTH = 1000
+SCREEN_WIDTH = 1050
 SCREEN_HEIGHT = 700
 GRID_SIZE = 45      
 GRID_MARGIN = 4     
@@ -11,11 +11,32 @@ COLS = 12
 START_X = 50
 START_Y = 50
 
-# --- WARNA (R, G, B) ---
+# --- KONFIGURASI GAMEPLAY ---
+LEVEL_DURATION = 180 
+MAX_HINTS = 3
+
+# --- WARNA DASAR ---
 COLOR_BG = (30, 30, 30)
 COLOR_TILE = (255, 255, 255)
-COLOR_SELECT = (100, 200, 255)   # Biru Alice
-COLOR_CORRECT = (100, 255, 100)  # Hijau
 COLOR_TEXT = (0, 0, 0)
+
+# --- WARNA INTERAKSI GRID ---
+COLOR_SELECT = (100, 200, 255)   # Biru saat drag
+COLOR_CORRECT = (100, 255, 100)  # Hijau benar
+COLOR_HOVER = (200, 230, 255)    # Biru muda saat mouse lewat
+COLOR_HINT = (255, 215, 0)       # Emas untuk hint grid
+
+# --- WARNA UI PANEL (TEMA ALICE) ---
+COLOR_PANEL_BG = (30, 20, 50, 230)      # Ungu Gelap Transparan
+COLOR_PANEL_BORDER = (150, 100, 200)    # Garis Tepi Ungu
 COLOR_UI_TEXT = (255, 255, 255)
-COLOR_OVERLAY = (0, 0, 0, 200)
+
+# Warna List Soal
+COLOR_Q_ACTIVE = (240, 240, 255) # Soal belum terjawab
+COLOR_Q_DONE = (100, 255, 100)   # Soal sudah terjawab (Hijau)
+COLOR_Q_DIM = (120, 100, 140)    # Soal sudah terjawab (Redup)
+
+# Warna Tombol Hint
+COLOR_BTN_NORMAL = (255, 200, 50) # Emas
+COLOR_BTN_HOVER = (255, 230, 150) # Emas Terang
+COLOR_BTN_DISABLED = (100, 100, 100) # Abu-abu
