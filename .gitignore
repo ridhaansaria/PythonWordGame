@@ -1,0 +1,40 @@
+# --- Python Basics ---
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Virtual Environments (PENTING) ---
+# Jangan pernah upload folder venv karena isinya ribuan file library
+venv/
+env/
+.env
+.venv/
+virtualenv/
+
+# --- Operating System Files ---
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Editor / IDE Settings ---
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# --- Game Assets (Opsional) ---
+# Jika kamu punya file mentahan desain (Photoshop/Illustrator)
+# yang ukurannya besar dan tidak dipakai langsung di game, bisa di-ignore.
+*.psd
+*.ai
+*.kra
+
+# --- Logs ---
+*.log

@@ -1,0 +1,21 @@
+# settings.py
+
+# --- KONFIGURASI LAYAR ---
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 700
+GRID_SIZE = 45      
+GRID_MARGIN = 4     
+ROWS = 12           
+COLS = 12           
+
+START_X = 50
+START_Y = 50
+
+# --- WARNA (R, G, B) ---
+COLOR_BG = (30, 30, 30)
+COLOR_TILE = (255, 255, 255)
+COLOR_SELECT = (100, 200, 255)   # Biru Alice
+COLOR_CORRECT = (100, 255, 100)  # Hijau
+COLOR_TEXT = (0, 0, 0)
+COLOR_UI_TEXT = (255, 255, 255)
+COLOR_OVERLAY = (0, 0, 0, 200)

@@ -1,20 +1,44 @@
-# **🕵️‍♀️ Alice's Word Search Game**
+# **🕵️‍♀️ Alice's Modular Word Search Game**
 
-Sebuah permainan **Cari Kata (Word Search)** klasik yang dibangun menggunakan **Python** dan library **Pygame**. Game ini menantang pemain untuk menemukan kata-kata tersembunyi di dalam grid acak berdasarkan petunjuk kuis bertema _"Alice in Wonderland"_.
+Sebuah permainan **Cari Kata (Word Search)** tingkat lanjut yang dibangun menggunakan **Python** dan library **Pygame**.
 
-## **✨ Fitur Utama**
+Game ini tidak hanya sekadar mencari kata, tetapi juga dirancang dengan struktur kode **Modular** yang rapi, sistem **Multi-Level**, algoritma penempatan **Zig-Zag**, dan antarmuka **Menu Utama** yang interaktif.
 
-- **Grid Dinamis:** Huruf-huruf diacak dan ditempatkan secara otomatis setiap kali game dimulai.
+## **✨ Fitur Unggulan**
 
-- **Orientasi Kata:** Mendukung penempatan kata secara **Horizontal (Mendatar)** dan **Vertical (Menurun)**.
+### **🎮 Gameplay & Fitur**
 
-- **Interaktif:** Menggunakan mouse (drag & drop) untuk memilih deretan huruf.
+- **Sistem Multi-Level:** Game terdiri dari berbagai level (Alice, Hewan, Coding) dengan transisi otomatis saat level selesai.
+- **Menu Utama Interaktif:** Dilengkapi halaman Menu Utama, Halaman Petunjuk (How to Play), dan Pause Menu.
+- **Grid Cerdas (Zig-Zag):** Algoritma generator memastikan variasi orientasi kata (Horizontal & Vertikal) seimbang.
+- **Validasi 2 Arah:** Mendeteksi jawaban dari kiri-ke-kanan/atas-ke-bawah maupun sebaliknya (terbalik).
+- **Visual Feedback:** Efek _Hover_ pada tombol, serta indikator warna saat seleksi huruf.
 
-- **Validasi Cerdas:** Mendeteksi jawaban baik dari kiri-ke-kanan/atas-ke-bawah maupun sebaliknya (terbalik).
+### **💻 Teknis & Struktur**
 
-- **Visual Feedback:** Indikator warna untuk seleksi aktif (Biru) dan jawaban benar (Hijau).
+- **Modular Code:** Kode dipisah berdasarkan fungsinya (`main.py`, `ui.py`, `utils.py`, `levels.py`, `settings.py`) untuk kemudahan maintenance.
+- **Safe Asset Loading:** Game memiliki mekanisme _fallback_. Jika gambar tidak ditemukan, game otomatis menggunakan grafis bawaan (kotak warna) tanpa error.
 
-- **Sistem Aset Aman:** Game tetap berjalan menggunakan warna default meskipun file gambar (aset) tidak ditemukan.
+## **📂 Struktur Folder Proyek**
+
+Berikut adalah susunan file dalam proyek ini agar mudah dipahami:
+
+```text
+📁 project_folder/
+│
+├── 📜 main.py        # File Utama (Jalankan file ini!)
+├── 📜 pages.py          # Mengatur tampilan Menu, Tombol, dan Petunjuk
+├── 📜 levels.py      # Database soal dan jawaban per level
+├── 📜 utils.py       # Algoritma generator grid & logika acak
+├── 📜 settings.py    # Konfigurasi warna, ukuran layar, dan font
+│
+└── 📁 assets/        # (Opsional) Tempat menyimpan gambar & font
+    ├── bg.jpg
+    ├── tile.png
+    ├── tile_select.png
+    ├── tile_correct.png
+    └── alice_font.ttf
+```
 
 ## **🛠️ Prasyarat (Requirements)**
 
@@ -36,14 +60,15 @@ pip install pygame
 4. Jalankan game:
 
 ```bash
-python game.py
+python main.py
 ```
 
 ## **🎮 Cara Bermain**
 
-1. **Lihat Petunjuk:** Di sisi kanan layar terdapat daftar pertanyaan kuis (Contoh: "Tokoh utama Alice in...").
-2. **Cari Kata:** Temukan jawaban dari pertanyaan tersebut di dalam grid huruf (Contoh: "WONDERLAND").
-3. **Seleksi:**
+1. **Menu Utama:** Klik tombol "MULAI" untuk masuk ke permainan, atau "PETUNJUK" untuk membaca cara main.
+2. **Lihat Petunjuk:** Di sisi kanan layar terdapat daftar pertanyaan kuis (Contoh: "Tokoh utama Alice in...").
+3. **Cari Kata:** Temukan jawaban dari pertanyaan tersebut di dalam grid huruf (Contoh: "WONDERLAND").
+4. **Seleksi:**
 
    - Klik kiri dan tahan pada huruf pertama.
 
@@ -51,47 +76,31 @@ python game.py
 
    - Lepas tombol mouse.
 
-4. Jika benar, huruf akan berubah menjadi **Hijau** dan jawaban di panel kanan akan terbuka.
+5. Jika benar, huruf akan berubah menjadi **Hijau** dan jawaban di panel kanan akan terbuka.
 
-## **📂 Struktur File & Aset**
+## **⚙️ Kustomisasi (Modding)**
 
-Game ini dirancang untuk memuat aset gambar jika tersedia, namun akan menggunakan warna _fallback_ jika gambar tidak ada.
+Karena struktur kodenya modular, kamu bisa memodifikasi game ini dengan mudah:
 
-- `game.py`: File utama kode program.
+- **Menambah Level Baru:** Buka `levels.py` dan tambahkan entry baru ke dalam list `LEVEL_DATA`. Kamu bisa mengatur soal, jawaban, dan background spesifik per level.
 
-- (Opsional) `bg.jpg`: Gambar latar belakang (Ukuran 1000x700).
+- **Mengubah Warna/Ukuran:** Buka `settings.py`. Di sana kamu bisa mengubah resolusi layar (`SCREEN_WIDTH`), ukuran kotak (`GRID_SIZE`), atau palet warna.
 
-- (Opsional) `tile.png`: Gambar kotak huruf normal.
-
-- (Opsional) `tile_select.png`: Gambar kotak saat dipilih.
-
-- (Opsional) `tile_correct.png`: Gambar kotak saat jawaban benar.
-
-## **⚙️ Kustomisasi Soal**
-
-Kamu bisa mengubah pertanyaan dan jawaban dengan mudah. Buka file game.py dan edit bagian `DATA_KUIS`:
-
-```python
-DATA_KUIS = {
-    "Pertanyaan Kamu": "JAWABAN",
-    "Ibu Kota Indonesia": "JAKARTA",
-    "Bahasa Pemrograman ini": "PYTHON"
-}
-```
+- **Mengganti Tampilan:** Cukup ganti gambar di folder `assets/` dengan nama file yang sama. Tidak perlu mengubah kode!
 
 _Catatan: Pastikan jawaban hanya berisi huruf kapital dan tanpa spasi agar sesuai dengan logika grid._
 
 ## **🧠 Konsep Pemrograman**
 
-Proyek ini menerapkan beberapa konsep dasar Informatika:
+Proyek ini menerapkan prinsip Software Engineering yang baik:
 
-- **Array 2 Dimensi:** Representasi grid huruf.
+- **Separation of Concerns (SoC):** Memisahkan logika game (`main.py`), tampilan (`pages.py`), dan data (`levels.py`).
 
-- **Algoritma Pengacakan:** Penempatan kata secara acak (Randomize placement) dengan pengecekan tabrakan (collision detection).
+- **Algorithm Design:** Logika penempatan kata Zig-Zag (Horizontal-Vertikal bergantian) untuk distribusi yang merata.
 
-- **Event Handling:** Memproses input mouse (Click, Drag, Release) di Pygame.
+- **Error Handling:** Penggunaan blok `try-except` untuk menangani aset yang hilang.
 
-- **String Manipulation:** Membalikkan string (slicing) untuk mengecek jawaban terbalik.
+- **State Management:** Mengelola status game (`MENU`, `PLAYING`, `LEVEL_COMPLETE`, `GAME_OVER`).
 
 ---
 
