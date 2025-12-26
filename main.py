@@ -18,7 +18,7 @@ class WordSearchGame:
         # --- SETUP FONT (Disimpan dalam Dictionary biar rapi saat dilempar ke UI) ---
         self.fonts = {}
         try:
-            font_path = os.path.join("assets", "alice_font.ttf")
+            font_path = os.path.join("assets", "fonts", "alice_font.ttf")
             self.fonts['tile'] = pygame.font.Font(font_path, 28)
             self.fonts['title'] = pygame.font.Font(font_path, 40)
         except:
@@ -70,7 +70,7 @@ class WordSearchGame:
         self.level_duration = LEVEL_DURATION
 
     def load_bg(self, bg_name):
-        path = os.path.join("assets", bg_name)
+        path = os.path.join("assets","images", bg_name)
         try:
             img = pygame.image.load(path)
             self.images['bg'] = pygame.transform.scale(img, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -80,7 +80,7 @@ class WordSearchGame:
     def load_images(self):
         def load_asset(name, w, h):
             try:
-                img = pygame.image.load(os.path.join("assets", name))
+                img = pygame.image.load(os.path.join("assets","images", name))
                 return pygame.transform.scale(img, (w, h))
             except: return None
 
@@ -88,10 +88,6 @@ class WordSearchGame:
         self.images['tile'] = load_asset('tile.png', GRID_SIZE, GRID_SIZE)
         self.images['select'] = load_asset('tile_select.png', GRID_SIZE, GRID_SIZE)
         self.images['correct'] = load_asset('tile_correct.png', GRID_SIZE, GRID_SIZE)
-
-    # ... (Fungsi get_grid_pos, get_selected_cells, use_hint, check_answer TETAP SAMA seperti sebelumnya) ...
-    # Saya skip biar tidak kepanjangan, copy dari kode sebelumnya saja.
-    # Pastikan copy fungsi get_grid_pos, get_selected_cells, use_hint, check_answer ke sini!
     
     def get_grid_pos(self, mouse_x, mouse_y):
         if mouse_x < START_X or mouse_y < START_Y: return None
