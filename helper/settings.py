@@ -11,12 +11,12 @@ START_Y = 50
 
 # --- KONFIGURASI GAMEPLAY ---
 LEVEL_DURATION = 180 
-MAX_HINTS = 3
+MAX_HINTS = 4
 
 # --- WARNA DASAR ---
-COLOR_BG = (30, 30, 30)
+COLOR_BG = (240, 169, 45)
 COLOR_TILE = (255, 255, 255)
-COLOR_TEXT = (0, 0, 0)
+COLOR_TEXT = (75, 39, 24)
 
 # --- WARNA INTERAKSI GRID ---
 COLOR_SELECT = (100, 200, 255)   # Biru saat drag
@@ -25,8 +25,8 @@ COLOR_HOVER = (200, 230, 255)    # Biru muda saat mouse lewat
 COLOR_HINT = (255, 215, 0)       # Emas untuk hint grid
 
 # --- WARNA UI PANEL (TEMA ALICE) ---
-COLOR_PANEL_BG = (30, 20, 50, 230)      # Ungu Gelap Transparan
-COLOR_PANEL_BORDER = (150, 100, 200)    # Garis Tepi Ungu
+COLOR_PANEL_BG = (241, 194, 123, 230)      # Ungu Gelap Transparan
+COLOR_PANEL_BORDER = (252, 249, 218)    # Garis Tepi Ungu
 COLOR_UI_TEXT = (255, 255, 255)
 
 # Warna List Soal

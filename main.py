@@ -11,40 +11,91 @@ from pages.game import draw_game_panel
 class WordSearchGame:
     def __init__(self):
         pygame.init()
+        
+        # --- 1. SETUP AUDIO (MIXER) ---
+        try:
+            pygame.mixer.init()
+        except:
+            print("Audio device tidak ditemukan. Game berjalan tanpa suara.")
+
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Alice's Word Search")
         self.clock = pygame.time.Clock()
         
-        # --- SETUP FONT (Disimpan dalam Dictionary biar rapi saat dilempar ke UI) ---
+        # --- SETUP FONT ---
         self.fonts = {}
         try:
-            font_path = os.path.join("assets", "fonts", "alice_font.ttf")
+            font_path = os.path.join("assets", "fonts", "LuckiestGuy.ttf") 
+            balsamiq_path = os.path.join("assets", "fonts", "BalsamiqSans-Bold.ttf")
+            
+            # Font Utama
             self.fonts['tile'] = pygame.font.Font(font_path, 28)
             self.fonts['title'] = pygame.font.Font(font_path, 40)
+            
+            # Font Balsamiq (Untuk "Let's Play")
+            if os.path.exists(balsamiq_path):
+                self.fonts['balsamiq'] = pygame.font.Font(balsamiq_path, 30)
+            else:
+                self.fonts['balsamiq'] = pygame.font.SysFont('Arial', 30, bold=True)
+                
         except:
+            print("Font custom tidak ditemukan, menggunakan default.")
             self.fonts['tile'] = pygame.font.SysFont('Arial', 24, bold=True)
             self.fonts['title'] = pygame.font.SysFont('Arial', 40, bold=True)
+            self.fonts['balsamiq'] = pygame.font.SysFont('Arial', 30, bold=True)
             
         self.fonts['ui'] = pygame.font.SysFont('Arial', 18)
         self.fonts['menu'] = pygame.font.SysFont('Arial', 24, bold=True)
 
         # --- SETUP TOMBOL ---
         cx = SCREEN_WIDTH // 2
+        # Posisi tombol agak ke bawah karena judul besar
         self.btn_start = pygame.Rect(0, 0, 280, 50); self.btn_start.center = (cx, 350)
         self.btn_help = pygame.Rect(0, 0, 280, 50); self.btn_help.center = (cx, 420)
         self.btn_quit = pygame.Rect(0, 0, 280, 50); self.btn_quit.center = (cx, 490)
         self.btn_back = pygame.Rect(0, 0, 150, 40); self.btn_back.bottomright = (SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20)
         
-        # Rect Hint di-inisialisasi dulu, nanti posisinya diatur ulang oleh ui.py
         self.btn_hint = pygame.Rect(0, 0, 100, 40)
 
         # --- LOAD ASSETS ---
         self.images = {}
         self.load_images()
+
+        self.sounds = {}
+        self.load_sounds()
         
         self.game_state = "MENU"
         self.current_level_index = 0
         self.load_level(self.current_level_index)
+
+    def load_images(self):
+        def load_asset(name, w, h):
+            try:
+                path = os.path.join("assets", "images", name)
+                if not os.path.exists(path):
+                    print(f"Warning: {name} tidak ditemukan.")
+                    return None
+                img = pygame.image.load(path)
+                return pygame.transform.scale(img, (w, h))
+            except: 
+                return None
+
+        # --- LOAD BACKGROUND THEMES ---
+        self.bg_themes = {}
+        self.bg_themes['forest'] = load_asset('bg_forest.jpg', SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.bg_themes['city']   = load_asset('bg_city.jpg', SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.bg_themes['ocean']  = load_asset('bg_ocean.jpg', SCREEN_WIDTH, SCREEN_HEIGHT)
+        
+        # Default Background
+        self.images['bg'] = self.bg_themes['forest']
+
+        # --- Load Aset Lainnya ---
+        self.images['tile'] = load_asset('tile.png', GRID_SIZE, GRID_SIZE)
+        self.images['select'] = load_asset('tile_select.png', GRID_SIZE, GRID_SIZE)
+        self.images['correct'] = load_asset('tile_correct.png', GRID_SIZE, GRID_SIZE)
+        
+        # Load Karakter Menu (Pastikan nama file benar)
+        self.images['char_menu'] = load_asset('character_menu.png', 350, 350)
 
     def load_level(self, index):
         level_info = LEVEL_DATA[index]
@@ -52,8 +103,25 @@ class WordSearchGame:
         self.current_dict = level_info["data"]
         self.answers = list(self.current_dict.values())
         
-        bg_name = level_info.get("bg_file", "bg.jpg")
-        self.load_bg(bg_name)
+        # --- LOGIKA BATCH BACKGROUND (1-10 Hutan, 11-20 Kota, dst) ---
+        level_num = index + 1
+        selected_bg = None
+        
+        if 1 <= level_num <= 10:
+            selected_bg = self.bg_themes.get('forest')
+        elif 11 <= level_num <= 20:
+            selected_bg = self.bg_themes.get('city')
+        else:
+            selected_bg = self.bg_themes.get('ocean')
+
+        # Fallback jika background tema tidak ditemukan
+        if selected_bg:
+            self.images['bg'] = selected_bg
+        else:
+             # Coba load dari data level, atau default forest
+             bg_file = level_info.get("bg_file")
+             if bg_file: self.load_bg(bg_file)
+             else: self.images['bg'] = self.bg_themes.get('forest')
 
         self.grid, self.word_locations = create_grid(ROWS, COLS, self.answers)
         
@@ -75,19 +143,35 @@ class WordSearchGame:
             img = pygame.image.load(path)
             self.images['bg'] = pygame.transform.scale(img, (SCREEN_WIDTH, SCREEN_HEIGHT))
         except:
-            self.images['bg'] = None
+            pass
 
-    def load_images(self):
-        def load_asset(name, w, h):
+    def load_sounds(self):
+        def load_sfx(name):
             try:
-                img = pygame.image.load(os.path.join("assets","images", name))
-                return pygame.transform.scale(img, (w, h))
-            except: return None
+                path = os.path.join("assets", "sounds", name)
+                if os.path.exists(path):
+                    return pygame.mixer.Sound(path)
+                return None
+            except:
+                return None
 
-        self.load_bg('bg.jpg')
-        self.images['tile'] = load_asset('tile.png', GRID_SIZE, GRID_SIZE)
-        self.images['select'] = load_asset('tile_select.png', GRID_SIZE, GRID_SIZE)
-        self.images['correct'] = load_asset('tile_correct.png', GRID_SIZE, GRID_SIZE)
+        self.sounds['click'] = load_sfx('click.wav')
+        self.sounds['correct'] = load_sfx('correct.wav')
+        self.sounds['win'] = load_sfx('win.wav')
+
+    def play_sfx(self, name):
+        if name in self.sounds and self.sounds[name] is not None:
+            self.sounds[name].play()
+
+    def play_bgm(self, filename):
+        try:
+            path = os.path.join("assets", "sounds", filename)
+            if os.path.exists(path):
+                pygame.mixer.music.load(path)
+                pygame.mixer.music.set_volume(0.5)
+                pygame.mixer.music.play(-1)
+        except:
+            print("BGM Error")
     
     def get_grid_pos(self, mouse_x, mouse_y):
         if mouse_x < START_X or mouse_y < START_Y: return None
@@ -131,25 +215,24 @@ class WordSearchGame:
             self.found_words.append(word[::-1]); found_new = True
 
         if found_new:
+            self.play_sfx('correct') # Mainkan suara
             for r, c in cells: self.grid_solved[r][c] = True
             if self.hint_cell in cells: self.hint_cell = None
             if len(self.found_words) == len(self.answers):
+                self.play_sfx('win') # Mainkan suara
                 if self.current_level_index < len(LEVEL_DATA) - 1:
                     self.game_state = "LEVEL_COMPLETE"
                 else: self.game_state = "GAME_OVER"
 
     def draw_game(self):
-        # 1. Background
         if self.images['bg']: self.screen.blit(self.images['bg'], (0, 0))
         else: self.screen.fill(COLOR_BG)
 
         mouse_pos = pygame.mouse.get_pos()
         hover_cell = self.get_grid_pos(*mouse_pos)
 
-        # 2. Gambar Grid
         selected_cells = self.get_selected_cells() if self.selecting else []
         
-        # Hint Highlight
         if self.hint_cell:
             hr, hc = self.hint_cell
             if not self.grid_solved[hr][hc]:
@@ -171,17 +254,18 @@ class WordSearchGame:
                 elif is_hovered: img, color = None, COLOR_HOVER
                 else: img, color = self.images['tile'], COLOR_TILE
 
-                if (r, c) == self.hint_cell and not is_solved and not is_selected and not is_hovered:
-                    pass 
-                else:
-                    if img: self.screen.blit(img, (x, y))
-                    else: pygame.draw.rect(self.screen, color, (x, y, GRID_SIZE, GRID_SIZE), border_radius=4)
+                is_active_hint = ((r, c) == self.hint_cell and not is_solved and not is_selected and not is_hovered)
+
+                if not is_active_hint:
+                    if img: 
+                        self.screen.blit(img, (x, y))
+                    else: 
+                        pygame.draw.rect(self.screen, color, (x, y, GRID_SIZE, GRID_SIZE), border_radius=4)
 
                 text = self.fonts['tile'].render(self.grid[r][c], True, COLOR_TEXT)
                 rect = text.get_rect(center=(x + GRID_SIZE//2, y + GRID_SIZE//2))
                 self.screen.blit(text, rect)
 
-        # 3. UI PANEL (Panggil dari ui.py)
         seconds_passed = (pygame.time.get_ticks() - self.start_ticks) / 1000
         time_left = max(0, self.level_duration - seconds_passed)
         
@@ -195,7 +279,6 @@ class WordSearchGame:
             'btn_hint_rect': self.btn_hint 
         }
         
-        # Panggil fungsi gambar UI yang baru
         draw_game_panel(self.screen, self.fonts, game_data, mouse_pos)
 
     def draw_overlays(self):
@@ -234,20 +317,30 @@ class WordSearchGame:
                 if self.game_state == "MENU":
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                         if self.btn_start.collidepoint(event.pos):
+                            self.play_sfx('click')
                             self.current_level_index = 0; self.load_level(0); self.game_state = "PLAYING"
-                        elif self.btn_help.collidepoint(event.pos): self.game_state = "INSTRUCTIONS"
-                        elif self.btn_quit.collidepoint(event.pos): pygame.quit(); sys.exit()
+                        elif self.btn_help.collidepoint(event.pos): 
+                            self.play_sfx('click')
+                            self.game_state = "INSTRUCTIONS"
+                        elif self.btn_quit.collidepoint(event.pos): 
+                            self.play_sfx('click')
+                            pygame.quit(); sys.exit()
 
                 elif self.game_state == "INSTRUCTIONS":
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        if self.btn_back.collidepoint(event.pos): self.game_state = "MENU"
+                        if self.btn_back.collidepoint(event.pos): 
+                            self.play_sfx('click')
+                            self.game_state = "MENU"
 
                 elif self.game_state == "PLAYING":
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        pos = self.get_grid_pos(*event.pos)
-                        if pos: self.selecting = True; self.start_pos = pos; self.current_pos = pos
-                        elif self.btn_hint.collidepoint(event.pos): self.use_hint()
-
+                        if self.btn_hint.collidepoint(event.pos): 
+                            self.play_sfx('click')
+                            self.use_hint()
+                        else:
+                            pos = self.get_grid_pos(*event.pos)
+                            if pos: self.selecting = True; self.start_pos = pos; self.current_pos = pos
+                            
                     elif event.type == pygame.MOUSEMOTION and self.selecting:
                         pos = self.get_grid_pos(*event.pos)
                         if pos: self.current_pos = pos
@@ -269,16 +362,17 @@ class WordSearchGame:
 
             if self.game_state == "MENU":
                 buttons_list = [self.btn_start, self.btn_help, self.btn_quit]
-                draw_menu_page(self.screen, self.images['bg'], self.fonts['title'], self.fonts['menu'], buttons_list)
-            
-            elif self.game_state == "INSTRUCTIONS":
-                draw_instructions_page(
+                # --- PERBAIKAN UTAMA DI SINI ---
+                draw_menu_page(
                     self.screen, 
                     self.images['bg'], 
-                    self.fonts,             # Kirim dictionary fonts
-                    self.btn_back, 
-                    pygame.mouse.get_pos()  # Kirim posisi mouse untuk efek hover
+                    self.fonts, 
+                    buttons_list, 
+                    self.images.get('char_menu')
                 )
+            
+            elif self.game_state == "INSTRUCTIONS":
+                draw_instructions_page(self.screen, self.images['bg'], self.fonts, self.btn_back, pygame.mouse.get_pos())
             
             elif self.game_state == "PLAYING":
                 self.draw_game()
