@@ -97,6 +97,11 @@ class WordSearchGame:
         # Load Karakter Menu (Pastikan nama file benar)
         self.images['char_menu'] = load_asset('character_menu.png', 350, 350)
 
+        instr_char_size = 150 
+        self.images['char_i1'] = load_asset('char_instr_1.png', instr_char_size, instr_char_size)
+        self.images['char_i2'] = load_asset('char_instr_2.png', instr_char_size, instr_char_size)
+        self.images['char_i3'] = load_asset('char_instr_3.png', instr_char_size, instr_char_size)
+
     def load_level(self, index):
         level_info = LEVEL_DATA[index]
         self.level_name = level_info["name"]
@@ -148,7 +153,7 @@ class WordSearchGame:
     def load_sounds(self):
         def load_sfx(name):
             try:
-                path = os.path.join("assets", "sounds", name)
+                path = os.path.join("assets", "audio", name)
                 if os.path.exists(path):
                     return pygame.mixer.Sound(path)
                 return None
@@ -165,7 +170,7 @@ class WordSearchGame:
 
     def play_bgm(self, filename):
         try:
-            path = os.path.join("assets", "sounds", filename)
+            path = os.path.join("assets", "audio", filename)
             if os.path.exists(path):
                 pygame.mixer.music.load(path)
                 pygame.mixer.music.set_volume(0.5)
@@ -249,18 +254,24 @@ class WordSearchGame:
                 is_selected = (r, c) in selected_cells
                 is_hovered = (r, c) == hover_cell
                 
-                if is_solved: img, color = self.images['correct'], COLOR_CORRECT
-                elif is_selected: img, color = self.images['select'], COLOR_SELECT
-                elif is_hovered: img, color = None, COLOR_HOVER
-                else: img, color = self.images['tile'], COLOR_TILE
-
+                # --- BAGIAN INI DIUBAH ---
+                
+                img = None
+                base_color = COLOR_TILE
+                if is_solved: 
+                    img = self.images['correct'] # Gambar centang hijau
+                    base_color = COLOR_CORRECT
+                elif is_selected: 
+                    img = self.images['select']  # Gambar highlight biru
+                    base_color = COLOR_SELECT
+                elif is_hovered: 
+                    base_color = COLOR_HOVER
                 is_active_hint = ((r, c) == self.hint_cell and not is_solved and not is_selected and not is_hovered)
 
                 if not is_active_hint:
+                    pygame.draw.rect(self.screen, base_color, (x, y, GRID_SIZE, GRID_SIZE), border_radius=8)
                     if img: 
                         self.screen.blit(img, (x, y))
-                    else: 
-                        pygame.draw.rect(self.screen, color, (x, y, GRID_SIZE, GRID_SIZE), border_radius=4)
 
                 text = self.fonts['tile'].render(self.grid[r][c], True, COLOR_TEXT)
                 rect = text.get_rect(center=(x + GRID_SIZE//2, y + GRID_SIZE//2))
@@ -365,15 +376,22 @@ class WordSearchGame:
                 # --- PERBAIKAN UTAMA DI SINI ---
                 draw_menu_page(
                     self.screen, 
-                    self.images['bg'], 
                     self.fonts, 
                     buttons_list, 
                     self.images.get('char_menu')
                 )
             
             elif self.game_state == "INSTRUCTIONS":
-                draw_instructions_page(self.screen, self.images['bg'], self.fonts, self.btn_back, pygame.mouse.get_pos())
-            
+                draw_instructions_page(
+                    self.screen, 
+                    self.fonts, 
+                    self.btn_back, 
+                    pygame.mouse.get_pos(),
+                    self.images.get('char_i1'),
+                    self.images.get('char_i2'),
+                    self.images.get('char_i3')
+                )
+
             elif self.game_state == "PLAYING":
                 self.draw_game()
             

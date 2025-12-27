@@ -17,14 +17,10 @@ def draw_timer(screen, remaining_seconds, font):
 
 def draw_game_panel(screen, fonts, game_data, mouse_pos):
     """
-    Menggambar seluruh UI sebelah kanan:
-    - Panel Background
-    - Timer (Dimasukkan ke sini biar rapi)
-    - Progress Bar
-    - List Soal
-    - Tombol Hint
+    Menggambar Panel Game Sebelah Kanan
+    Style: Paper Card (Krem & Coklat) - High Contrast
     """
-    # Unpack data game biar kodenya pendek
+    # Unpack data
     level_name = game_data['level_name']
     answers = game_data['answers']
     found_words = game_data['found_words']
@@ -33,116 +29,151 @@ def draw_game_panel(screen, fonts, game_data, mouse_pos):
     time_left = game_data['time_left']
     btn_hint_rect = game_data['btn_hint_rect']
 
-    # 1. SETUP AREA PANEL
+    # --- 1. SETUP AREA PANEL ---
+    # Posisi panel di sebelah kanan grid
     panel_x = START_X + (COLS * (GRID_SIZE + GRID_MARGIN)) + 40
-    panel_width = 320 
-    panel_height = SCREEN_HEIGHT - 60 
-    
-    # Background Panel (Ungu Gelap Magic)
-    panel_surf = pygame.Surface((panel_width, panel_height), pygame.SRCALPHA)
-    panel_surf.fill(COLOR_PANEL_BG) 
-    pygame.draw.rect(panel_surf, COLOR_PANEL_BORDER, (0,0, panel_width, panel_height), 3, border_radius=20)
-    screen.blit(panel_surf, (panel_x, 30))
+    panel_width = 340 # Lebarkan sedikit biar lega
+    panel_height = SCREEN_HEIGHT - 60
+    panel_y_start = 30 
 
+    # --- BACKGROUND PANEL (PAPER STYLE) ---
+    # Warna Krem Terang (Solid) agar kontras dengan teks
+    PANEL_BG_COLOR = (255, 248, 220) 
+    PANEL_BORDER_COLOR = (255, 255, 255) # Outline putih
+    TEXT_COLOR = (80, 50, 20) # Coklat Tua (Enak dibaca)
+
+    # Gambar Kotak Panel
+    panel_rect = pygame.Rect(panel_x, panel_y_start, panel_width, panel_height)
+    pygame.draw.rect(screen, PANEL_BG_COLOR, panel_rect, border_radius=20)
+    pygame.draw.rect(screen, PANEL_BORDER_COLOR, panel_rect, 4, border_radius=20) # Outline tebal
+
+    # Setup Kursor Menggambar (Jarak dari atas panel)
     content_x = panel_x + 25
-    current_y = 60 
+    current_y = panel_y_start + 30
 
-    # 2. GAMBAR TIMER (DI DALAM PANEL - PALING ATAS)
-    # Konversi detik ke MM:SS
+    # --- 2. TIMER & TIME BAR (PENGGANTI PROGRESS BAR) ---
+    # Teks Waktu
     minutes = int(time_left // 60)
     seconds = int(time_left % 60)
     timer_str = f"WAKTU: {minutes:02}:{seconds:02}"
     
-    # Warna timer berubah merah jika < 30 detik
-    timer_col = (255, 100, 100) if time_left < 30 else (255, 255, 255)
-    
+    # Warna Timer: Merah jika < 30 detik, selain itu Coklat
+    timer_col = (220, 50, 50) if time_left < 30 else TEXT_COLOR
     timer_surf = fonts['ui'].render(timer_str, True, timer_col)
-    screen.blit(timer_surf, (content_x, current_y - 15)) # Posisi paling atas
-    
-    current_y += 30 # Geser ke bawah
+    screen.blit(timer_surf, (content_x, current_y))
+    current_y += 30
 
-    # 3. JUDUL LEVEL
-    title_surf = fonts['title'].render(level_name, True, (255, 255, 255))
+    # GAMBAR TIME BAR
+    bar_width_total = panel_width - 50
+    ratio = max(0, time_left / LEVEL_DURATION)
+    bar_width_current = int(bar_width_total * ratio)
+
+    # Background Bar (Abu-abu tipis)
+    pygame.draw.rect(screen, (220, 220, 210), (content_x, current_y, bar_width_total, 12), border_radius=6)
+    
+    # Isi Bar (Warna Oranye/Kuning bergradasi ke Merah)
+    bar_color = (255, 165, 0) # Oranye default
+    if ratio < 0.3: bar_color = (255, 70, 70) # Merah jika kritis
+    
+    if bar_width_current > 0:
+        pygame.draw.rect(screen, bar_color, (content_x, current_y, bar_width_current, 12), border_radius=6)
+    
+    current_y += 30 # Jarak ke Judul
+
+    # --- 3. JUDUL LEVEL ---
+    # Garis pemisah tipis
+    pygame.draw.line(screen, (200, 180, 150), (content_x, current_y), (content_x + bar_width_total, current_y), 2)
+    current_y += 20
+
+    title_surf = fonts['title'].render(level_name, True, TEXT_COLOR)
+    # Scale jika kepanjangan
     if title_surf.get_width() > panel_width - 50:
         scale = (panel_width - 50) / title_surf.get_width()
         title_surf = pygame.transform.scale(title_surf, (int(title_surf.get_width()*scale), int(title_surf.get_height()*scale)))
     
     screen.blit(title_surf, (content_x, current_y))
-    current_y += 65
-    
-    # 4. PROGRESS BAR
-    total_q = len(answers)
-    found_q = len(found_words)
-    progress_pct = found_q / total_q if total_q > 0 else 0
-    
-    bar_w = panel_width - 50
-    bar_h = 10
-    pygame.draw.rect(screen, (50, 40, 70), (content_x, current_y, bar_w, bar_h), border_radius=5)
-    if progress_pct > 0:
-        pygame.draw.rect(screen, COLOR_Q_DONE, (content_x, current_y, bar_w * progress_pct, bar_h), border_radius=5)
-    
-    # Teks progress angka
-    prog_txt = fonts['ui'].render(f"{found_q}/{total_q}", True, (200, 200, 200))
-    screen.blit(prog_txt, (content_x + bar_w - prog_txt.get_width(), current_y - 20))
-    
-    current_y += 25
-    pygame.draw.line(screen, COLOR_PANEL_BORDER, (content_x, current_y), (content_x + bar_w, current_y), 1)
-    current_y += 20
+    current_y += 60
 
-    # 5. DAFTAR SOAL
+    # --- 4. DAFTAR KATA (CHECKLIST) ---
+    # Kita gambar daftar kata
+    font_list = fonts['ui']
+    
     for q, ans in current_dict.items():
         is_found = ans in found_words
         
-        # Warna & Style
-        text_col = COLOR_Q_DIM if is_found else COLOR_Q_ACTIVE
-        ans_col = COLOR_Q_DONE if is_found else COLOR_SELECT
-        
-        # Ikon
-        icon_center = (content_x + 8, current_y + 10)
+        # Warna Teks
         if is_found:
-            pygame.draw.circle(screen, COLOR_Q_DONE, icon_center, 8)
-            # Centang simpel
-            pygame.draw.line(screen, (0,0,0), (icon_center[0]-3, icon_center[1]), (icon_center[0], icon_center[1]+3), 2)
-            pygame.draw.line(screen, (0,0,0), (icon_center[0], icon_center[1]+3), (icon_center[0]+4, icon_center[1]-4), 2)
+            row_color = (180, 180, 180) # Abu-abu jika sudah ketemu
+            icon_color = (100, 200, 100) # Ikon Hijau
         else:
-            pygame.draw.circle(screen, (150, 150, 200), icon_center, 8, 2)
+            row_color = TEXT_COLOR # Coklat Tua jika belum
+            icon_color = (200, 200, 200) # Ikon Abu
+            
+        # Gambar Ikon Bulat / Centang
+        icon_pos = (content_x + 10, current_y + 10)
+        pygame.draw.circle(screen, icon_color, icon_pos, 8)
+        if is_found:
+            # Gambar centang kecil putih
+            pygame.draw.line(screen, (255,255,255), (icon_pos[0]-3, icon_pos[1]), (icon_pos[0], icon_pos[1]+3), 2)
+            pygame.draw.line(screen, (255,255,255), (icon_pos[0], icon_pos[1]+3), (icon_pos[0]+4, icon_pos[1]-4), 2)
 
-        # Teks Soal
-        display_q = (q[:22] + '..') if len(q) > 22 else q
-        q_surf = fonts['ui'].render(display_q, True, text_col)
-        screen.blit(q_surf, (content_x + 25, current_y))
+        # Teks Soal/Kata
+        # Jika teks terlalu panjang, potong
+        display_text = q
+        if len(display_text) > 25: display_text = display_text[:22] + "..."
         
-        current_y += 22
+        txt_surf = font_list.render(display_text, True, row_color)
         
-        # Teks Jawaban (Placeholder / Asli)
-        ans_display = ans if is_found else " ".join(["_" for _ in ans])
-        a_surf = fonts['ui'].render(ans_display, True, ans_col)
-        screen.blit(a_surf, (content_x + 25, current_y))
-        
-        current_y += 35 
+        # Efek Coret (Strikethrough) jika sudah ketemu
+        if is_found:
+            strike_w = txt_surf.get_width()
+            pygame.draw.line(screen, row_color, (content_x + 25, current_y + 10), (content_x + 25 + strike_w, current_y + 10), 2)
 
-    # 6. TOMBOL HINT
-    btn_y = 30 + panel_height - 60
+        screen.blit(txt_surf, (content_x + 25, current_y))
+
+            
+        current_y += 35 # Jarak antar baris
+
+    # --- 5. TOMBOL HINT (STYLE BARU) ---
+    # Posisikan tombol hint di bagian bawah panel
+    btn_y = panel_y_start + panel_height - 70 
     btn_hint_rect.x = content_x
     btn_hint_rect.y = btn_y
     btn_hint_rect.width = panel_width - 50
-    btn_hint_rect.height = 45
+    btn_hint_rect.height = 50
 
+    # Warna Tombol Hint (Kuning Emas)
+    BTN_COLOR = (255, 200, 0)
+    SHADOW_COLOR = (180, 140, 0)
+    
+    # Efek Tombol (Shadow + Body)
     if hints_left > 0:
-        color = COLOR_BTN_HOVER if btn_hint_rect.collidepoint(mouse_pos) else COLOR_BTN_NORMAL
-        shadow_offset = 4
-        # Shadow
-        pygame.draw.rect(screen, (100, 70, 0), (btn_hint_rect.x, btn_hint_rect.y + shadow_offset, btn_hint_rect.w, btn_hint_rect.h), border_radius=10)
+        if btn_hint_rect.collidepoint(mouse_pos):
+            # Hover effect
+            current_btn_color = (255, 220, 50)
+            offset_y = 2
+            shadow_h = 4
+        else:
+            current_btn_color = BTN_COLOR
+            offset_y = 0
+            shadow_h = 6
+            
+        # Gambar Bayangan
+        pygame.draw.rect(screen, SHADOW_COLOR, (btn_hint_rect.x, btn_hint_rect.y + offset_y + shadow_h, btn_hint_rect.w, btn_hint_rect.h), border_radius=12)
+        # Gambar Body
+        btn_draw_rect = pygame.Rect(btn_hint_rect.x, btn_hint_rect.y + offset_y, btn_hint_rect.w, btn_hint_rect.h)
+        pygame.draw.rect(screen, current_btn_color, btn_draw_rect, border_radius=12)
+        pygame.draw.rect(screen, (0,0,0), btn_draw_rect, 2, border_radius=12)
+        
+        # Teks Hint
+        hint_text = f"HINT ({hints_left})"
+        txt_surf = fonts['menu'].render(hint_text, True, (0,0,0))
+        txt_rect = txt_surf.get_rect(center=btn_draw_rect.center)
+        screen.blit(txt_surf, txt_rect)
+        
     else:
-        color = COLOR_BTN_DISABLED
-        shadow_offset = 0
-
-    # Body Tombol
-    pygame.draw.rect(screen, color, btn_hint_rect, border_radius=10)
-    
-    # Teks Tombol
-    hint_str = f"HINT ({hints_left})" if hints_left > 0 else "HINT HABIS"
-    hint_surf = fonts['menu'].render(hint_str, True, (50, 30, 0) if hints_left > 0 else (200,200,200))
-    hint_rect = hint_surf.get_rect(center=btn_hint_rect.center)
-    screen.blit(hint_surf, hint_rect)   
-    
+        # Tombol Mati (Abu-abu)
+        pygame.draw.rect(screen, (200, 200, 200), btn_hint_rect, border_radius=12)
+        txt_surf = fonts['menu'].render("HINT HABIS", True, (150, 150, 150))
+        txt_rect = txt_surf.get_rect(center=btn_hint_rect.center)
+        screen.blit(txt_surf, txt_rect)

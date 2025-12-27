@@ -24,9 +24,8 @@ COLOR_CORRECT = (100, 255, 100)  # Hijau benar
 COLOR_HOVER = (200, 230, 255)    # Biru muda saat mouse lewat
 COLOR_HINT = (255, 215, 0)       # Emas untuk hint grid
 
-# --- WARNA UI PANEL (TEMA ALICE) ---
-COLOR_PANEL_BG = (241, 194, 123, 230)      # Ungu Gelap Transparan
-COLOR_PANEL_BORDER = (252, 249, 218)    # Garis Tepi Ungu
+COLOR_PANEL_BG = (241, 194, 123, 230)  
+COLOR_PANEL_BORDER = (252, 249, 218)
 COLOR_UI_TEXT = (255, 255, 255)
 
 # Warna List Soal
