@@ -15,6 +15,8 @@ def draw_timer(screen, remaining_seconds, font):
     panel_x = START_X + (COLS * (GRID_SIZE + GRID_MARGIN)) + 30
     screen.blit(timer_surf, (panel_x, 20))
 
+
+
 def draw_game_panel(screen, fonts, game_data, mouse_pos):
     """
     Menggambar Panel Game Sebelah Kanan
@@ -27,6 +29,7 @@ def draw_game_panel(screen, fonts, game_data, mouse_pos):
     current_dict = game_data['current_dict']
     hints_left = game_data['hints_left']
     time_left = game_data['time_left']
+    total_duration = game_data['total_duration'] # Ambil durasi total
     btn_hint_rect = game_data['btn_hint_rect']
 
     # --- 1. SETUP AREA PANEL ---
@@ -65,7 +68,8 @@ def draw_game_panel(screen, fonts, game_data, mouse_pos):
 
     # GAMBAR TIME BAR
     bar_width_total = panel_width - 50
-    ratio = max(0, time_left / LEVEL_DURATION)
+    # Gunakan total_duration dari config, bukan konstanta
+    ratio = max(0, time_left / total_duration) if total_duration > 0 else 0
     bar_width_current = int(bar_width_total * ratio)
 
     # Background Bar (Abu-abu tipis)
@@ -117,22 +121,38 @@ def draw_game_panel(screen, fonts, game_data, mouse_pos):
             pygame.draw.line(screen, (255,255,255), (icon_pos[0]-3, icon_pos[1]), (icon_pos[0], icon_pos[1]+3), 2)
             pygame.draw.line(screen, (255,255,255), (icon_pos[0], icon_pos[1]+3), (icon_pos[0]+4, icon_pos[1]-4), 2)
 
-        # Teks Soal/Kata
-        # Jika teks terlalu panjang, potong
-        display_text = q
-        if len(display_text) > 25: display_text = display_text[:22] + "..."
+        # Teks Soal/Kata (Auto Wrap)
+        max_text_width = panel_width - 80 # Sisa lebar untuk teks (dikurangi margin & ikon)
+        words = q.split(' ')
+        lines = []
+        curr_line = ""
         
-        txt_surf = font_list.render(display_text, True, row_color)
+        for word in words:
+            test_line = curr_line + " " + word if curr_line else word
+            w, h = font_list.size(test_line)
+            if w <= max_text_width:
+                curr_line = test_line
+            else:
+                lines.append(curr_line)
+                curr_line = word
+        if curr_line: lines.append(curr_line)
         
-        # Efek Coret (Strikethrough) jika sudah ketemu
-        if is_found:
-            strike_w = txt_surf.get_width()
-            pygame.draw.line(screen, row_color, (content_x + 25, current_y + 10), (content_x + 25 + strike_w, current_y + 10), 2)
-
-        screen.blit(txt_surf, (content_x + 25, current_y))
-
+        # Render setiap baris
+        start_y_row = current_y
+        for i, line_text in enumerate(lines):
+            txt_surf = font_list.render(line_text, True, row_color)
             
-        current_y += 35 # Jarak antar baris
+            # Efek Coret (Strikethrough) hanya jika sudah ketemu
+            if is_found:
+                strike_w = txt_surf.get_width()
+                # Coret per baris
+                pygame.draw.line(screen, row_color, (content_x + 25, current_y + 10), (content_x + 25 + strike_w, current_y + 10), 2)
+            
+            screen.blit(txt_surf, (content_x + 25, current_y))
+            current_y += 22 # Spasi antar baris dalam satu item (lebih rapat)
+
+        # Jarak tambahan antar item soal
+        current_y += 12
 
     # --- 5. TOMBOL HINT (STYLE BARU) ---
     # Posisikan tombol hint di bagian bawah panel
@@ -171,9 +191,31 @@ def draw_game_panel(screen, fonts, game_data, mouse_pos):
         txt_rect = txt_surf.get_rect(center=btn_draw_rect.center)
         screen.blit(txt_surf, txt_rect)
         
-    else:
-        # Tombol Mati (Abu-abu)
-        pygame.draw.rect(screen, (200, 200, 200), btn_hint_rect, border_radius=12)
-        txt_surf = fonts['menu'].render("HINT HABIS", True, (150, 150, 150))
-        txt_rect = txt_surf.get_rect(center=btn_hint_rect.center)
-        screen.blit(txt_surf, txt_rect)
+    # --- 6. TOMBOL KEMBALI (DI ATAS HINT) ---
+    btn_back_rect = pygame.Rect(0, 0, panel_width - 50, 50)
+    btn_back_rect.x = content_x
+    btn_back_rect.bottom = btn_hint_rect.top - 15 # Jarak 15px di atas tombol hint
+    
+    is_hover_back = btn_back_rect.collidepoint(mouse_pos)
+    
+    # Style: Tombol Kayu/Gold (Sedikit lebih gelap dari Hint)
+    bg_col_back = (255, 180, 60) if is_hover_back else (255, 160, 30)
+    border_col_back = (100, 60, 20)
+    
+    # Shadow
+    pygame.draw.rect(screen, (150, 100, 0), (btn_back_rect.x, btn_back_rect.y+4, btn_back_rect.w, btn_back_rect.h), border_radius=12)
+    # Body
+    pygame.draw.rect(screen, bg_col_back, btn_back_rect, border_radius=12)
+    # Border
+    pygame.draw.rect(screen, border_col_back, btn_back_rect, 2, border_radius=12)
+    
+    txt_back = fonts['menu'].render("MENU UTAMA", True, (60, 40, 10))
+    # Scale text if needed
+    if txt_back.get_width() > btn_back_rect.width - 20: 
+        s = (btn_back_rect.width - 20) / txt_back.get_width()
+        txt_back = pygame.transform.scale(txt_back, (int(txt_back.get_width()*s), int(txt_back.get_height()*s)))
+
+    tr_back = txt_back.get_rect(center=btn_back_rect.center)
+    screen.blit(txt_back, tr_back)
+    
+    return btn_back_rect

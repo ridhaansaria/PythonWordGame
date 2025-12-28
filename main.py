@@ -6,12 +6,18 @@ from helper.settings import *
 from helper.levels import LEVEL_DATA
 from helper.utils import create_grid
 from pages.menu import draw_menu_page, draw_instructions_page
-from pages.game import draw_game_panel
+from pages.game import draw_game_panel, draw_timer
+from pages.levels import draw_level_select_page
+from pages.settings import draw_settings_page
 
 class WordSearchGame:
     def __init__(self):
         pygame.init()
-        
+
+        # Custom Config (Mutable)
+        self.config_duration = LEVEL_DURATION # Default from settings.py (originally 180)
+        self.config_max_hints = MAX_HINTS     # Default from settings.py (originally 3)
+
         # --- 1. SETUP AUDIO (MIXER) ---
         try:
             pygame.mixer.init()
@@ -19,7 +25,7 @@ class WordSearchGame:
             print("Audio device tidak ditemukan. Game berjalan tanpa suara.")
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Alice's Word Search")
+        pygame.display.set_caption("Word Games")
         self.clock = pygame.time.Clock()
         
         # --- SETUP FONT ---
@@ -53,6 +59,15 @@ class WordSearchGame:
         self.btn_start = pygame.Rect(0, 0, 280, 50); self.btn_start.center = (cx, 350)
         self.btn_help = pygame.Rect(0, 0, 280, 50); self.btn_help.center = (cx, 420)
         self.btn_quit = pygame.Rect(0, 0, 280, 50); self.btn_quit.center = (cx, 490)
+
+        # BUTTON BARU: LEVEL
+        # Geser posisi tombol agar muat
+        self.btn_start.center = (cx, 320)
+        self.btn_levels = pygame.Rect(0, 0, 280, 50); self.btn_levels.center = (cx, 390)
+        self.btn_settings = pygame.Rect(0, 0, 280, 50); self.btn_settings.center = (cx, 460)
+        self.btn_help.center = (cx, 530)
+        self.btn_quit.center = (cx, 600)
+        
         self.btn_back = pygame.Rect(0, 0, 150, 40); self.btn_back.bottomright = (SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20)
         
         self.btn_hint = pygame.Rect(0, 0, 100, 40)
@@ -66,6 +81,7 @@ class WordSearchGame:
         
         self.game_state = "MENU"
         self.current_level_index = 0
+        self.current_level_page_idx = 0 # Untuk pagination level
         self.load_level(self.current_level_index)
 
     def load_images(self):
@@ -136,11 +152,11 @@ class WordSearchGame:
         self.start_pos = None 
         self.current_pos = None
         
-        self.hints_left = MAX_HINTS
+        self.hints_left = self.config_max_hints
         self.hint_cell = None 
 
         self.start_ticks = pygame.time.get_ticks()
-        self.level_duration = LEVEL_DURATION
+        self.level_duration = self.config_duration
 
     def load_bg(self, bg_name):
         path = os.path.join("assets","images", bg_name)
@@ -254,15 +270,13 @@ class WordSearchGame:
                 is_selected = (r, c) in selected_cells
                 is_hovered = (r, c) == hover_cell
                 
-                # --- BAGIAN INI DIUBAH ---
-                
                 img = None
                 base_color = COLOR_TILE
                 if is_solved: 
-                    img = self.images['correct'] # Gambar centang hijau
+                    img = self.images['correct'] 
                     base_color = COLOR_CORRECT
                 elif is_selected: 
-                    img = self.images['select']  # Gambar highlight biru
+                    img = self.images['select']  
                     base_color = COLOR_SELECT
                 elif is_hovered: 
                     base_color = COLOR_HOVER
@@ -287,10 +301,12 @@ class WordSearchGame:
             'current_dict': self.current_dict,
             'hints_left': self.hints_left,
             'time_left': time_left,
+            'total_duration': self.level_duration, 
             'btn_hint_rect': self.btn_hint 
         }
         
-        draw_game_panel(self.screen, self.fonts, game_data, mouse_pos)
+        # Capture the returned back button rect
+        self.btn_back_game_rect = draw_game_panel(self.screen, self.fonts, game_data, mouse_pos)
 
     def draw_overlays(self):
         overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
@@ -330,12 +346,41 @@ class WordSearchGame:
                         if self.btn_start.collidepoint(event.pos):
                             self.play_sfx('click')
                             self.current_level_index = 0; self.load_level(0); self.game_state = "PLAYING"
+                        elif self.btn_levels.collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.game_state = "LEVEL_SELECT"
+                        elif self.btn_settings.collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.game_state = "SETTINGS"
                         elif self.btn_help.collidepoint(event.pos): 
                             self.play_sfx('click')
                             self.game_state = "INSTRUCTIONS"
                         elif self.btn_quit.collidepoint(event.pos): 
                             self.play_sfx('click')
                             pygame.quit(); sys.exit()
+
+                elif self.game_state == "LEVEL_SELECT":
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        # Cek tombol level
+                         l_buttons, b_back, b_prev, b_next = draw_level_select_page(self.screen, self.fonts, LEVEL_DATA, self.current_level_page_idx)
+                         
+                         if b_back.collidepoint(event.pos):
+                             self.play_sfx('click')
+                             self.game_state = "MENU"
+                         elif b_prev and b_prev.collidepoint(event.pos):
+                             self.play_sfx('click')
+                             self.current_level_page_idx = max(0, self.current_level_page_idx - 1)
+                         elif b_next and b_next.collidepoint(event.pos):
+                             self.play_sfx('click')
+                             self.current_level_page_idx += 1 # Batas max dicek di draw_level_select_page logic render, tapi aman ditambah karena tombol next hanya muncul jika ada page
+                         else:
+                             for rect, idx in l_buttons:
+                                 if rect.collidepoint(event.pos):
+                                     self.play_sfx('click')
+                                     self.current_level_index = idx
+                                     self.load_level(idx)
+                                     self.game_state = "PLAYING"
+                                     break
 
                 elif self.game_state == "INSTRUCTIONS":
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -345,7 +390,15 @@ class WordSearchGame:
 
                 elif self.game_state == "PLAYING":
                     if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        if self.btn_hint.collidepoint(event.pos): 
+                        # Cek Back Button (Dynamic Rect from draw_game)
+                        # Note: btn_back_game_rect might not be set on very first frame if loop runs first? 
+                        # Usually draw runs once before input? No, typically input then draw.
+                        # So let's handle attribute error just in case or init it.
+                        # For safety, we check existence.
+                        if hasattr(self, 'btn_back_game_rect') and self.btn_back_game_rect.collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.game_state = "MENU" # User requested Menu Utama
+                        elif self.btn_hint.collidepoint(event.pos): 
                             self.play_sfx('click')
                             self.use_hint()
                         else:
@@ -357,11 +410,35 @@ class WordSearchGame:
                         if pos: self.current_pos = pos
                     elif event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.selecting:
                         self.selecting = False; self.check_answer(); self.start_pos = None
-                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE: self.game_state = "MENU"
+                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE: self.game_state = "LEVEL_SELECT" # Balik ke level select aja enak
+
+                elif self.game_state == "SETTINGS":
+                    btns_cfg, b_back = draw_settings_page(self.screen, self.fonts, self.config_duration, self.config_max_hints)
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        if b_back.collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.game_state = "MENU"
+                        
+                        # Handle Config Buttons
+                        if btns_cfg.get('time_minus') and btns_cfg['time_minus'].collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.config_duration = max(30, self.config_duration - 30)
+                        elif btns_cfg.get('time_plus') and btns_cfg['time_plus'].collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.config_duration += 30
+                            
+                        if btns_cfg.get('hint_minus') and btns_cfg['hint_minus'].collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.config_max_hints = max(0, self.config_max_hints - 1)
+                        elif btns_cfg.get('hint_plus') and btns_cfg['hint_plus'].collidepoint(event.pos):
+                            self.play_sfx('click')
+                            self.config_max_hints += 1
 
                 elif self.game_state == "LEVEL_COMPLETE":
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                         self.current_level_index += 1; self.load_level(self.current_level_index); self.game_state = "PLAYING"
+
+
 
                 elif self.game_state == "GAME_OVER":
                     if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE: self.game_state = "MENU"
@@ -372,7 +449,7 @@ class WordSearchGame:
                         elif event.key == pygame.K_ESCAPE: self.game_state = "MENU"
 
             if self.game_state == "MENU":
-                buttons_list = [self.btn_start, self.btn_help, self.btn_quit]
+                buttons_list = [self.btn_start, self.btn_levels, self.btn_settings, self.btn_help, self.btn_quit]
                 # --- PERBAIKAN UTAMA DI SINI ---
                 draw_menu_page(
                     self.screen, 
@@ -391,9 +468,14 @@ class WordSearchGame:
                     self.images.get('char_i2'),
                     self.images.get('char_i3')
                 )
+                
+            elif self.game_state == "LEVEL_SELECT":
+                 draw_level_select_page(self.screen, self.fonts, LEVEL_DATA, self.current_level_page_idx)
 
             elif self.game_state == "PLAYING":
                 self.draw_game()
+                # draw_back_button removed, now handled inside draw_game -> draw_game_panel
+
             
             elif self.game_state in ["LEVEL_COMPLETE", "GAME_OVER", "TIME_UP"]:
                 self.draw_game()

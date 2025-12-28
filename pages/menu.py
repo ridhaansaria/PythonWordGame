@@ -119,7 +119,7 @@ def draw_menu_page(screen,fonts, buttons, char_image=None):
 
     # 5. Tombol
     mouse_pos = pygame.mouse.get_pos()
-    labels = ["MULAI", "PETUNJUK", "KELUAR"]
+    labels = ["MULAI", "LEVEL", "PENGATURAN", "PETUNJUK", "KELUAR"]
     BTN_BG = (255, 255, 255) 
     BTN_TEXT = (0, 0, 0)
     
@@ -128,6 +128,16 @@ def draw_menu_page(screen,fonts, buttons, char_image=None):
     for i, btn_rect in enumerate(buttons):
         label = labels[i] if i < len(labels) else "..."
         draw_button(screen, btn_rect, label, font_btn, mouse_pos, bg_color=BTN_BG, text_color=BTN_TEXT)
+
+    # 6. Watermark (Credits)
+    # "A Game From : Retma | Nessa | Sovia | Hanif"
+    font_watermark = fonts.get('ui') # Font kecil
+    watermark_text = "A Game From : Retma | Nessa | Sovia | Hanif"
+    
+    # Render teks
+    wm_surf = font_watermark.render(watermark_text, True, (100, 60, 20)) # Coklat gelap
+    wm_rect = wm_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 20)) # Paling bawah
+    screen.blit(wm_surf, wm_rect)
 
 def draw_instructions_page(screen, fonts, btn_back, mouse_pos, char1=None, char2=None, char3=None):
     """Menggambar Halaman Petunjuk dengan Style 'Paper Card' (Mirip PDF)"""
