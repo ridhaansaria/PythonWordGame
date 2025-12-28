@@ -155,7 +155,7 @@ LEVEL_DATA = [
         "name": "Level 16: Tanggung Jawab",
         "data": {
             "Tidak paksa kehendak": "DEMOKRATIS",
-            "Tugas sampai tuntas": "TANGGUNGJAWAB",
+            "Tugas sampai tuntas": "TUNTAS",
             "Cepat dalam bekerja": "CEKATAN",
             "Tenangkan orang lain": "PENENANG",
             "Berani tampil depan": "VOKAL"
@@ -224,7 +224,7 @@ LEVEL_DATA = [
     {
         "name": "Level 23: Kesadaran Lingkungan",
         "data": {
-            "Selaras alam": "RAMAHLINGKUNGAN",
+            "Selaras alam": "LESTARI",
             "Tidak terprovokasi": "ADEM",
             "Analisa dulu": "ANALITIS",
             "Hargai privasi": "BATASAN",
@@ -234,7 +234,7 @@ LEVEL_DATA = [
     {
         "name": "Level 24: Prinsip Teguh",
         "data": {
-            "Tidak takut gagal": "PANTANGMUNDUR",
+            "Tidak takut gagal": "MAJUTERUS",
             "Atur keuangan": "FINANSIAL",
             "Pikir sebelum tindak": "PRUDENT",
             "Tidak bedakan teman": "INKLUSIF",

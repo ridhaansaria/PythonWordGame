@@ -10,6 +10,16 @@ from pages.game import draw_game_panel, draw_timer
 from pages.levels import draw_level_select_page
 from pages.settings import draw_settings_page
 
+def resource_path(relative_path):
+    """ Dapatkan path absolut ke resource, kompatibel dengan dev dan PyInstaller """
+    try:
+        # PyInstaller membuat temp folder di _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 class WordSearchGame:
     def __init__(self):
         pygame.init()
@@ -26,13 +36,27 @@ class WordSearchGame:
 
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Word Games")
+        
+        # --- SETUP ICON ---
+        try:
+            # Gunakan resource_path agar icon terbaca di .exe juga
+            icon_path = resource_path(os.path.join("assets", "images", "icon.ico"))
+            if os.path.exists(icon_path):
+                icon_img = pygame.image.load(icon_path)
+                # Scale icon to typical size (e.g. 64x64)
+                icon_img = pygame.transform.scale(icon_img, (64, 64))
+                pygame.display.set_icon(icon_img)
+        except:
+            pass
+            
         self.clock = pygame.time.Clock()
         
         # --- SETUP FONT ---
         self.fonts = {}
         try:
-            font_path = os.path.join("assets", "fonts", "LuckiestGuy.ttf") 
-            balsamiq_path = os.path.join("assets", "fonts", "BalsamiqSans-Bold.ttf")
+            # Gunakan resource_path
+            font_path = resource_path(os.path.join("assets", "fonts", "LuckiestGuy.ttf"))
+            balsamiq_path = resource_path(os.path.join("assets", "fonts", "BalsamiqSans-Bold.ttf"))
             
             # Font Utama
             self.fonts['tile'] = pygame.font.Font(font_path, 28)
@@ -51,6 +75,7 @@ class WordSearchGame:
             self.fonts['balsamiq'] = pygame.font.SysFont('Arial', 30, bold=True)
             
         self.fonts['ui'] = pygame.font.SysFont('Arial', 18)
+        self.fonts['small'] = pygame.font.SysFont('Arial', 14) # Untuk watermark/detail kecil
         self.fonts['menu'] = pygame.font.SysFont('Arial', 24, bold=True)
 
         # --- SETUP TOMBOL ---
@@ -87,9 +112,10 @@ class WordSearchGame:
     def load_images(self):
         def load_asset(name, w, h):
             try:
-                path = os.path.join("assets", "images", name)
+                # Gunakan resource_path
+                path = resource_path(os.path.join("assets", "images", name))
                 if not os.path.exists(path):
-                    print(f"Warning: {name} tidak ditemukan.")
+                    print(f"Warning: {name} tidak ditemukan at {path}")
                     return None
                 img = pygame.image.load(path)
                 return pygame.transform.scale(img, (w, h))
@@ -154,12 +180,13 @@ class WordSearchGame:
         
         self.hints_left = self.config_max_hints
         self.hint_cell = None 
-
+        
         self.start_ticks = pygame.time.get_ticks()
         self.level_duration = self.config_duration
 
     def load_bg(self, bg_name):
-        path = os.path.join("assets","images", bg_name)
+        # Gunakan resource_path
+        path = resource_path(os.path.join("assets","images", bg_name))
         try:
             img = pygame.image.load(path)
             self.images['bg'] = pygame.transform.scale(img, (SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -169,7 +196,8 @@ class WordSearchGame:
     def load_sounds(self):
         def load_sfx(name):
             try:
-                path = os.path.join("assets", "audio", name)
+                # Gunakan resource_path
+                path = resource_path(os.path.join("assets", "audio", name))
                 if os.path.exists(path):
                     return pygame.mixer.Sound(path)
                 return None
@@ -186,7 +214,8 @@ class WordSearchGame:
 
     def play_bgm(self, filename):
         try:
-            path = os.path.join("assets", "audio", filename)
+            # Gunakan resource_path
+            path = resource_path(os.path.join("assets", "audio", filename))
             if os.path.exists(path):
                 pygame.mixer.music.load(path)
                 pygame.mixer.music.set_volume(0.5)

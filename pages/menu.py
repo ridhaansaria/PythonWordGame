@@ -131,11 +131,12 @@ def draw_menu_page(screen,fonts, buttons, char_image=None):
 
     # 6. Watermark (Credits)
     # "A Game From : Retma | Nessa | Sovia | Hanif"
-    font_watermark = fonts.get('ui') # Font kecil
+    font_watermark = fonts.get('small', fonts.get('ui')) # Gunakan font kecil
     watermark_text = "A Game From : Retma | Nessa | Sovia | Hanif"
     
     # Render teks
     wm_surf = font_watermark.render(watermark_text, True, (100, 60, 20)) # Coklat gelap
+    wm_surf.set_alpha(int(255 * 0.85)) # Opacity 85%
     wm_rect = wm_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 20)) # Paling bawah
     screen.blit(wm_surf, wm_rect)
 

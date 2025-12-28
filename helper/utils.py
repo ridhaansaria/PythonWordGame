@@ -17,7 +17,9 @@ def create_grid(rows, cols, words):
             direction = priority_dirs[0] if attempts < 100 else random.choice(['H', 'V'])
 
             if direction == 'H': 
-                if cols - len(word) < 0: continue 
+                if cols - len(word) < 0: 
+                    attempts += 1 # Increments attempts even if skipped
+                    continue 
                 r = random.randint(0, rows - 1)
                 c = random.randint(0, cols - len(word))
                 
@@ -37,7 +39,9 @@ def create_grid(rows, cols, words):
                     placed = True
             
             else: # Vertikal
-                if rows - len(word) < 0: continue
+                if rows - len(word) < 0: 
+                    attempts += 1
+                    continue
                 r = random.randint(0, rows - len(word))
                 c = random.randint(0, cols - 1)
                 collision = False
