@@ -17,6 +17,15 @@ Aplikasi ini bersifat **Portable**, artinya bisa langsung dimainkan tanpa perlu 
 
 > **Catatan:** Jika muncul peringatan keamanan dari Windows (SmartScreen), klik **"More Info"** lalu pilih **"Run Anyway"**. Ini wajar karena aplikasi ini dibuat sendiri dan belum memiliki sertifikat digital komersial.
 
+
+## **🎮 Kontrol Permainan**
+
+- **Klik Kiri (Drag):** Menandai kata di dalam kotak permainan.
+- **Tombol HINT:** Membuka huruf awal dari kata yang belum ditemukan.
+- **Tombol ESC:** Kembali ke menu sebelumnya (Saat bermain) atau Keluar (Di Menu Utama).
+- **Tombol R:** Ulangi level saat waktu habis.
+- **Tombol SPASI:** Lanjut ke level berikutnya saat menang.
+
 ---
 
 ## **2. Fitur-Fitur Game**
